@@ -5,6 +5,7 @@ import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,6 +26,8 @@ public class HeldShieldDrMod {
         ConfigManager.sync(MODID, Config.Type.INSTANCE);
         ShieldDrConfig.refreshCaches();
         MinecraftForge.EVENT_BUS.register(new ShieldDamageHandler());
-        MinecraftForge.EVENT_BUS.register(new ShieldTooltipHandler());
+        if (event.getSide() == Side.CLIENT) {
+            MinecraftForge.EVENT_BUS.register(new ShieldTooltipHandler());
+        }
     }
 }
