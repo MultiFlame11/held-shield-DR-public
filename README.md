@@ -1,100 +1,83 @@
 # Held Shield DR
 
-Passive damage reduction for anyone holding a shield — no active block required.
+Passive damage reduction when holding a shield, no active block needed.
 
-If you're carrying a shield but haven't raised it, you still take full damage. This mod changes that. As long as a shield-like item is in your main hand or offhand, you take a configurable percentage less damage. It won't make you invincible. It just makes holding a shield feel like it actually matters.
+Normally if you're just carrying a shield without raising it you take full damage. This changes that. Having a shield in either hand cuts incoming damage by a set percentage. How much is up to you in the config.
 
 ---
 
 ## What it does
 
-- Reduces incoming damage when a shield-like item is held (main hand or offhand)
-- Works without actively blocking — purely passive
-- Applies to players by default, optionally to non-player entities too
-- Configurable reduction percentage, per-entity overrides, and per-item overrides
-- Optional durability drain: the shield loses durability based on how much damage it absorbed
-- Tooltips on shield items show their DR value so players know what they're holding
+- Reduces damage when a shield is held in main hand or offhand
+- No active blocking needed, purely passive
+- Players only by default, but can be extended to mobs
+- Per-entity and per-item DR overrides if you want finer control
+- Optional durability drain so the shield pays a cost for what it absorbs
+- Shield items show their DR value in the tooltip
 
 ---
 
 ## Config
 
-All config options live in `heldshielddr-common.toml` (Forge/NeoForge) or `heldshielddr.json` (Fabric) in your config folder.
+Forge/NeoForge: `heldshielddr-common.toml` in your config folder
+Fabric: `heldshielddr.json` in your config folder
 
 ### General
 
 | Option | Default | Description |
 |---|---|---|
-| `enabled` | `true` | Master switch. Set to `false` to disable everything. |
-| `damageReductionPercent` | `33.0` | Percentage of damage reduced for players and whitelisted entities. `33` = one third less damage. |
-| `applyToPlayers` | `true` | Whether players benefit from passive shield DR. |
-| `playersUseItemOverrides` | `true` | Whether players use per-item DR values when holding a matching shield. |
-| `showShieldTooltips` | `true` | Shows a tooltip line on shield items describing their DR value. |
-| `showItemOverrideText` | `false` | Appends `(Item Override)` to tooltips when a shield uses a per-item override. |
+| `enabled` | `true` | Turns the whole mod off if false. |
+| `damageReductionPercent` | `33.0` | How much damage is reduced for players and whitelisted entities. 33 = one third less. |
+| `applyToPlayers` | `true` | Whether players get the DR at all. |
+| `playersUseItemOverrides` | `true` | If the held shield has a per-item override, players use it instead of the normal percent. |
+| `showShieldTooltips` | `true` | Adds a line to shield tooltips showing the DR value. Requires client install to show. |
+| `showItemOverrideText` | `false` | Adds "(Item Override)" to the tooltip when a per-item value is being used. |
 
 ### Entities
 
-By default only players are affected. These options let you extend it to mobs.
+Off by default. Opt in if you want mobs to benefit too.
 
 | Option | Default | Description |
 |---|---|---|
-| `applyToAllEntities` | `false` | Extends passive shield DR to all living entities holding a shield, not just players. |
-| `allEntitiesDamageReductionPercent` | `33.0` | DR percent used for entities covered by `applyToAllEntities`. Separate from the player value so you can tune them independently. |
-| `entitiesUseItemOverrides` | `false` | Whether eligible non-player entities can use per-item DR overrides. |
-| `entityWhitelist` | *(see below)* | List of specific entity IDs that use the shared `damageReductionPercent`. Useful when `applyToAllEntities` is off but you still want a few specific mobs covered. |
-| `entityDamageReductionOverrides` | *(see below)* | Per-entity custom DR values. Takes priority over everything else for that entity. |
+| `applyToAllEntities` | `false` | Gives passive shield DR to any living entity holding a shield. |
+| `allEntitiesDamageReductionPercent` | `33.0` | DR percent for entities covered by the above. Separate from the player value. |
+| `entitiesUseItemOverrides` | `false` | Whether non-player entities can use per-item DR overrides. |
+| `entityWhitelist` | *(example entries)* | Specific entity IDs that use the shared `damageReductionPercent`. Useful if you want a couple specific mobs covered without enabling it for everything. |
+| `entityDamageReductionOverrides` | *(example entries)* | Per-entity DR values. These take priority over everything else for that entity. |
 
 ### Per-item overrides
 
 | Option | Default | Description |
 |---|---|---|
-| `itemDamageReductionOverrides` | *(empty)* | Custom DR values for specific shield items. Format: `item_id;percent`. |
+| `itemDamageReductionOverrides` | *(empty)* | Custom DR for specific shield items. Format: `item_id;percent` |
 
 Example:
-```toml
+```
 itemDamageReductionOverrides = ["basemetals:diamond_shield;90.0"]
 ```
 
 ### Durability drain
 
-When enabled, the held shield loses durability proportional to how much damage it absorbed. Shields earn their keep.
+The shield loses durability based on how much damage it absorbed. Off by default.
 
 | Option | Default | Description |
 |---|---|---|
-| `shieldDurabilityDrainEnabled` | `false` | Whether blocking passively drains shield durability. |
-| `shieldDurabilityDrainMultiplier` | `1.0` | Durability drained per point of damage prevented. `1.0` = drain matches damage absorbed. `0.5` = half that. `2.0` = double. |
-| `shieldDurabilityDrainCap` | `0.0` | Maximum durability drained per hit. `0` = no cap. |
-
----
-
-## Entity whitelist and overrides
-
-The `entityWhitelist` and `entityDamageReductionOverrides` lists use entity IDs in `modid:entity_id` format.
-
-**Whitelist** — uses the shared `damageReductionPercent`:
-```toml
-entityWhitelist = ["touhou_little_maid:entity.passive.maid"]
-```
-
-**Per-entity override** — uses its own custom value, ignores everything else:
-```toml
-entityDamageReductionOverrides = ["touhou_little_maid:entity.passive.maid;65.0"]
-```
-
-An entity in `entityDamageReductionOverrides` does not also need to be in `entityWhitelist`.
+| `shieldDurabilityDrainEnabled` | `false` | Enables durability drain on passive blocks. |
+| `shieldDurabilityDrainMultiplier` | `1.0` | Durability lost per point of damage prevented. 1.0 matches damage absorbed, 0.5 is half, 2.0 is double. |
+| `shieldDurabilityDrainCap` | `0.0` | Max durability drained per hit. 0 means no cap. |
 
 ---
 
 ## Priority order
 
-When figuring out how much DR an entity gets, the mod checks in this order:
+For non-player entities, DR is picked in this order:
 
-1. Per-entity override (`entityDamageReductionOverrides`) — wins outright
-2. Entity whitelist (`entityWhitelist`) — uses `damageReductionPercent`
-3. All-entities fallback (`applyToAllEntities`) — uses `allEntitiesDamageReductionPercent`
-4. Nothing — entity is not affected
+1. Per-entity override - wins, ignores everything else
+2. Entity whitelist - uses `damageReductionPercent`
+3. All-entities fallback - uses `allEntitiesDamageReductionPercent`
+4. Not covered - no DR applied
 
-Per-item overrides sit on top of this: if the held item has an override and item overrides are enabled, the higher of the two values wins (for whitelist/all-entities entities). Entities with a per-entity override always use that value and ignore item overrides entirely.
+Per-item overrides layer on top: if an entity is covered by whitelist or all-entities and the held item has an override, it keeps whichever value is higher. Entities with a per-entity override always use that value and ignore item overrides.
 
 ---
 
@@ -119,6 +102,6 @@ Per-item overrides sit on top of this: if the held item has an override and item
 
 ## Notes
 
-- Server-side only. No client installation needed (tooltips require client install to show).
-- The default config includes `touhou_little_maid` entries as examples. Clear them out if you don't use that mod — they don't cause errors, they just sit there being a little embarrassing.
-- Durability drain is off by default. It's opt-in because making your shield slowly wear down from just holding it is a meaningful change and not everyone wants that.
+- Server-side only for the DR to work. Tooltips need client install.
+- The default config has `touhou_little_maid` example entries in the whitelist and overrides. Clear them out if you're not using that mod, they don't break anything but they're just sitting there.
+- Durability drain defaults to off because it's a pretty different playstyle to have your shield slowly wearing down just from holding it. Enable it if that's what you want.
