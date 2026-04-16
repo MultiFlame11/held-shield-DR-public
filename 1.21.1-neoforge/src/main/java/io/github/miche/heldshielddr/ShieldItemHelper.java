@@ -1,0 +1,109 @@
+package io.github.miche.heldshielddr;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.core.registries.BuiltInRegistries;
+
+public final class ShieldItemHelper {
+    private static final Set<String> WARNED_ITEM_CLASSES = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+    private ShieldItemHelper() {
+    }
+
+    public static Double getHeldShieldDamageReductionPercent(LivingEntity living, Double defaultReductionPercent, boolean useItemOverrides, boolean useHigherValueForItemOverride) {
+        if (defaultReductionPercent == null || living == null) {
+            return null;
+        }
+
+        Double mainhandReduction = getShieldDamageReductionPercent(
+            living.getMainHandItem(), living, defaultReductionPercent, useItemOverrides, useHigherValueForItemOverride
+        );
+        if (mainhandReduction != null) {
+            return mainhandReduction;
+        }
+
+        return getShieldDamageReductionPercent(
+            living.getOffhandItem(), living, defaultReductionPercent, useItemOverrides, useHigherValueForItemOverride
+        );
+    }
+
+    public static Double getItemDamageReductionOverride(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return null;
+        }
+
+        Item item = stack.getItem();
+        ResourceLocation registryName;
+        try {
+            registryName = BuiltInRegistries.ITEM.getKey(item);
+        } catch (RuntimeException e) {
+            warnItemFailure(item, "Encountered an item that threw while reading its registry name; skipping item override lookup.", e);
+            return null;
+        }
+
+        if (registryName == null) {
+            return null;
+        }
+
+        Map<String, Double> overrides = ShieldDrConfig.getItemDamageReductionOverrides();
+        return overrides.get(registryName.toString());
+    }
+
+    public static boolean isShieldLike(ItemStack stack) {
+        return isShieldLike(stack, null);
+    }
+
+    public static boolean isShieldLike(ItemStack stack, LivingEntity living) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+
+        Item item = stack.getItem();
+        try {
+            ResourceLocation registryName = BuiltInRegistries.ITEM.getKey(item);
+            if (registryName != null && registryName.getPath().contains("shield")) {
+                return true;
+            }
+
+            if (living != null) {
+                return stack.getUseAnimation() == UseAnim.BLOCK && stack.getUseDuration(living) > 0;
+            }
+
+            return stack.getUseAnimation() == UseAnim.BLOCK;
+        } catch (RuntimeException e) {
+            warnItemFailure(item, "Encountered an item that threw during held shield detection; treating it as non-shield.", e);
+            return false;
+        }
+    }
+
+    private static Double getShieldDamageReductionPercent(ItemStack stack, LivingEntity living, double defaultReductionPercent, boolean useItemOverrides, boolean useHigherValueForItemOverride) {
+        if (!isShieldLike(stack, living)) {
+            return null;
+        }
+
+        if (!useItemOverrides) {
+            return defaultReductionPercent;
+        }
+
+        Double itemOverride = getItemDamageReductionOverride(stack);
+        if (itemOverride == null) {
+            return defaultReductionPercent;
+        }
+
+        return useHigherValueForItemOverride ? Math.max(defaultReductionPercent, itemOverride) : itemOverride;
+    }
+
+    private static void warnItemFailure(Item item, String message, RuntimeException e) {
+        String itemClass = item == null ? "unknown" : item.getClass().getName();
+        if (WARNED_ITEM_CLASSES.add(itemClass)) {
+            HeldShieldDrMod.LOGGER.warn("{} Item class: {}", message, itemClass, e);
+        }
+    }
+}

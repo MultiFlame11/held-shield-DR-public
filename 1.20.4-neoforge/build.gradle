@@ -1,0 +1,39 @@
+plugins {
+    id 'net.neoforged.gradle.userdev' version '7.0.192'
+}
+
+version = '1.1.1'
+group = 'io.github.miche.heldshielddr'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+runs {
+    configureEach {
+        modSource project.sourceSets.main
+    }
+    client {}
+    server {}
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:20.4.251"
+}
+
+jar {
+    archiveFileName = "held-shield-dr-${version}+1.20.4-neoforge.jar"
+    manifest {
+        attributes([
+            'Specification-Title'     : 'heldshielddr',
+            'Specification-Vendor'    : 'miche',
+            'Specification-Version'   : '1',
+            'Implementation-Title'    : project.name,
+            'Implementation-Version'  : "${version}",
+            'Implementation-Vendor'   : 'miche',
+            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
