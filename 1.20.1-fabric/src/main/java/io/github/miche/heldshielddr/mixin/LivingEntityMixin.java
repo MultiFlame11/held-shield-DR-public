@@ -15,32 +15,9 @@ import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
-    @Inject(method = "hurt", at = @At("HEAD"))
-    private void heldShieldDr$debugIncomingHurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        LivingEntity self = (LivingEntity) (Object) this;
-        if (!(self instanceof Player) || self.level().isClientSide()) {
-            return;
-        }
-
-        ShieldDrConfig config = HeldShieldDrMod.config;
-        HeldShieldDrMod.LOGGER.info(
-            "[Held Shield DR debug] hurt() player={} amount={} configPresent={} enabled={} applyToPlayers={} playersUseItemOverrides={} mainHand={} offHand={}",
-            self.getName().getString(),
-            amount,
-            config != null,
-            config != null && config.enabled,
-            config != null && config.applyToPlayers,
-            config != null && config.playersUseItemOverrides,
-            heldShieldDr$describeStack(self.getMainHandItem()),
-            heldShieldDr$describeStack(self.getOffhandItem())
-        );
-    }
-
     @ModifyArg(
         method = "hurt",
         at = @At(
@@ -72,15 +49,11 @@ public abstract class LivingEntityMixin {
         ShieldDrConfig config = HeldShieldDrMod.config;
 
         if (config == null || !config.enabled || self.level().isClientSide() || amount <= 0.0F) {
-            heldShieldDr$debugDecision(self, config, amount, null, null, "skipped early");
             return amount;
         }
 
         Double reductionPercent = getReductionPercent(self, config);
-        if (reductionPercent == null) {
-            heldShieldDr$debugDecision(self, config, amount, null, null, "no base reduction");
-            return amount;
-        }
+        if (reductionPercent == null) return amount;
 
         Double heldShieldReductionPercent;
         try {
@@ -92,17 +65,12 @@ public abstract class LivingEntityMixin {
                 !isPlayer && !isEntityOverride(self, config)
             );
         } catch (RuntimeException e) {
-            heldShieldDr$debugDecision(self, config, amount, reductionPercent, null, "exception while checking held items");
             return amount;
         }
 
-        if (heldShieldReductionPercent == null) {
-            heldShieldDr$debugDecision(self, config, amount, reductionPercent, null, "no shield reduction result");
-            return amount;
-        }
+        if (heldShieldReductionPercent == null) return amount;
 
         float finalAmount = amount * config.getDamageMultiplier(heldShieldReductionPercent);
-        heldShieldDr$debugDecision(self, config, amount, reductionPercent, heldShieldReductionPercent, "applied");
 
         if (config.shieldDurabilityDrainEnabled) {
             heldShieldDr$applyDurabilityDrain(self, amount - finalAmount, config);
@@ -157,40 +125,5 @@ public abstract class LivingEntityMixin {
         ResourceLocation key = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
         if (key == null) return false;
         return config.getEntityDamageReductionOverrides().containsKey(key.toString());
-    }
-
-    private static void heldShieldDr$debugDecision(LivingEntity entity, ShieldDrConfig config, float incomingAmount, Double baseReductionPercent, Double heldShieldReductionPercent, String reason) {
-        if (!(entity instanceof Player) || entity.level().isClientSide()) {
-            return;
-        }
-
-        HeldShieldDrMod.LOGGER.info(
-            "[Held Shield DR debug] player={} reason={} incoming={} baseReduction={} heldShieldReduction={} mainHand={} offHand={}",
-            entity.getName().getString(),
-            reason,
-            incomingAmount,
-            baseReductionPercent,
-            heldShieldReductionPercent,
-            heldShieldDr$describeStack(entity.getMainHandItem()),
-            heldShieldDr$describeStack(entity.getOffhandItem())
-        );
-    }
-
-    private static String heldShieldDr$describeStack(ItemStack stack) {
-        if (stack == null || stack.isEmpty()) {
-            return "empty";
-        }
-
-        ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        Double override = ShieldItemHelper.getItemDamageReductionOverride(stack);
-        return String.format(
-            "%s x%d shieldLike=%s override=%s useAnim=%s useDuration=%d",
-            key != null ? key.toString() : "unknown",
-            stack.getCount(),
-            ShieldItemHelper.isShieldLike(stack),
-            override,
-            stack.getUseAnimation(),
-            stack.getUseDuration()
-        );
     }
 }
