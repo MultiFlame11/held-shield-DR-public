@@ -4,7 +4,7 @@ license="All Rights Reserved"
 
 [[mods]]
 modId="heldshielddr"
-version="1.1.1"
+version="1.1.2"
 displayName="Held Shield DR"
 description='''
 Gives players and configurable non-player entities passive damage reduction while holding a shield in either hand.

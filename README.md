@@ -85,18 +85,18 @@ Per-item overrides layer on top: if an entity is covered by whitelist or all-ent
 
 | Version | Loader | Jar |
 |---|---|---|
-| 1.12.2 | Forge | `held-shield-dr-1.1.1+1.12.2-forge.jar` |
-| 1.16.5 | Forge | `held-shield-dr-1.1.1+1.16.5-forge.jar` |
-| 1.16.5 | Fabric | `held-shield-dr-1.1.1+1.16.5-fabric.jar` |
-| 1.18.2 | Forge | `held-shield-dr-1.1.1+1.18.2-forge.jar` |
-| 1.18.2 | Fabric | `held-shield-dr-1.1.1+1.18.2-fabric.jar` |
-| 1.20.1 | Forge | `held-shield-dr-1.1.1+1.20.1-forge.jar` |
-| 1.20.1 | Fabric | `held-shield-dr-1.1.1+1.20.1-fabric.jar` |
-| 1.20.4 | NeoForge | `held-shield-dr-1.1.1+1.20.4-neoforge.jar` |
-| 1.20.4 | Fabric | `held-shield-dr-1.1.1+1.20.4-fabric.jar` |
-| 1.21.1 | Forge | `held-shield-dr-1.1.1+1.21.1-forge.jar` |
-| 1.21.1 | NeoForge | `held-shield-dr-1.1.1+1.21.1-neoforge.jar` |
-| 1.21.1 | Fabric | `held-shield-dr-1.1.1+1.21.1-fabric.jar` |
+| 1.12.2 | Forge | `held-shield-dr-1.1.2+1.12.2-forge.jar` |
+| 1.16.5 | Forge | `held-shield-dr-1.1.2+1.16.5-forge.jar` |
+| 1.16.5 | Fabric | `held-shield-dr-1.1.2+1.16.5-fabric.jar` |
+| 1.18.2 | Forge | `held-shield-dr-1.1.2+1.18.2-forge.jar` |
+| 1.18.2 | Fabric | `held-shield-dr-1.1.2+1.18.2-fabric.jar` |
+| 1.20.1 | Forge | `held-shield-dr-1.1.2+1.20.1-forge.jar` |
+| 1.20.1 | Fabric | `held-shield-dr-1.1.2+1.20.1-fabric.jar` |
+| 1.20.4 | NeoForge | `held-shield-dr-1.1.2+1.20.4-neoforge.jar` |
+| 1.20.4 | Fabric | `held-shield-dr-1.1.2+1.20.4-fabric.jar` |
+| 1.21.1 | Forge | `held-shield-dr-1.1.2+1.21.1-forge.jar` |
+| 1.21.1 | NeoForge | `held-shield-dr-1.1.2+1.21.1-neoforge.jar` |
+| 1.21.1 | Fabric | `held-shield-dr-1.1.2+1.21.1-fabric.jar` |
 
 ---
 
