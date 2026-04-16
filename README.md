@@ -103,5 +103,5 @@ Per-item overrides layer on top: if an entity is covered by whitelist or all-ent
 ## Notes
 
 - Server-side only for the DR to work. Tooltips need client install.
-- The default config has `touhou_little_maid` example entries in the whitelist and overrides. Clear them out if you're not using that mod, they don't break anything but they're just sitting there.
+- The default config has `touhou_little_maid` example entries in the whitelist and overrides. Clear them out if you're not using that mod, they don't break anything but they're just sitting there. Note: the entity ID changed between mod versions. Older releases use `touhou_little_maid:entity.passive.maid`, newer ones just use `touhou_little_maid:maid`. Check yours with F3 or a mod like Just Enough Items if you're not sure which one to put in.
 - Durability drain defaults to off because it's a pretty different playstyle to have your shield slowly wearing down just from holding it. Enable it if that's what you want.
