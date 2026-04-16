@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "heldshielddr",
+    "name": "Held Shield DR",
+    "description": "Gives players and configurable non-player entities passive damage reduction while holding a shield in either hand.",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": ["miche"],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]

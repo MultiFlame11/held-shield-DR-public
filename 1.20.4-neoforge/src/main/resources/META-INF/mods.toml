@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="[2,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="heldshielddr"
+version="1.1.1"
+displayName="Held Shield DR"
+description='''
+Gives players and configurable non-player entities passive damage reduction while holding a shield in either hand.
+'''
+
+[[dependencies.heldshielddr]]
+    modId="neoforge"
+    mandatory=true
+    versionRange="[20.4,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.heldshielddr]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.4,1.21)"
+    ordering="NONE"
+    side="BOTH"
