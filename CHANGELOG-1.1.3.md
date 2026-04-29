@@ -1,10 +1,20 @@
 # Held Shield DR 1.1.3
 
-Small platform fill in. No gameplay changes.
+Big config and parity pass across every shipped version.
 
 ## Added
 
-1.21.1 NeoForge build. Same feature parity as the existing 1.21.1 Forge and 1.21.1 Fabric variants. Same config keys, same defaults, same behavior.
+- 1.21.1 NeoForge build
+- `passiveBlockChance` for chance-based passive shield DR
+- `damageReductionMode` with `fixed` and `random_range`
+- `damageReductionMinPercent` and `damageReductionMaxPercent` for range tuning
+- optional proc sound config with sound id, volume, pitch, and cooldown
+
+## Changed
+
+- all 12 builds now share the same shield DR feature set and config surface
+- default behavior stays the same unless you turn on the new knobs
+- publish setup was cleaned up so builds no longer depend on local Java paths
 
 ## Build coverage
 
@@ -14,7 +24,9 @@ All 12 builds touched, all 12 ship:
 
 ## Upgrading
 
-Drop in the new jar for your loader. No config changes needed.
+Drop in the new jar for your loader.
+
+Existing configs still load fine. The new options will show up with their defaults when the config updates.
 
 ## Issues
 
