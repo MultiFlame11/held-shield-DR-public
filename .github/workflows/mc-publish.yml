@@ -1,0 +1,174 @@
+name: Publish Minecraft Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: Version folder to build and publish
+        required: true
+        type: choice
+        options:
+          - 1.12.2-forge
+          - 1.16.5-fabric
+          - 1.16.5-forge
+          - 1.18.2-fabric
+          - 1.18.2-forge
+          - 1.20.1-fabric
+          - 1.20.1-forge
+          - 1.20.4-fabric
+          - 1.20.4-neoforge
+          - 1.21.1-fabric
+          - 1.21.1-forge
+          - 1.21.1-neoforge
+      release-version:
+        description: Optional release version string. Leave blank to use 1.1.3 plus the selected folder name
+        required: false
+        default: ""
+        type: string
+      version-type:
+        description: Release channel
+        required: true
+        default: release
+        type: choice
+        options:
+          - release
+          - beta
+          - alpha
+      modrinth-id:
+        description: Modrinth project id
+        required: false
+        default: ""
+        type: string
+      curseforge-id:
+        description: CurseForge project id
+        required: false
+        default: "1515619"
+        type: string
+      changelog-file:
+        description: Optional changelog file path from repo root
+        required: false
+        default: "CHANGELOG-1.1.3.md"
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Pick Java version
+        id: java
+        shell: bash
+        run: |
+          project="${{ inputs.project }}"
+          case "$project" in
+            1.12.2-*|1.16.5-*)
+              echo "version=8" >> "$GITHUB_OUTPUT"
+              ;;
+            1.18.2-*|1.20.1-*|1.20.4-*)
+              echo "version=17" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "version=21" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ steps.java.outputs.version }}
+
+      - name: Make Gradle wrapper executable
+        shell: bash
+        run: chmod +x "${{ inputs.project }}/gradlew"
+
+      - name: Build selected version
+        shell: bash
+        working-directory: ${{ inputs.project }}
+        run: ./gradlew build --no-daemon
+
+      - name: Collect publish metadata
+        id: meta
+        shell: bash
+        run: |
+          project="${{ inputs.project }}"
+          mc_version="${project%%-*}"
+          loader="${project##*-}"
+          release_version="${{ inputs.release-version }}"
+          if [ -z "$release_version" ]; then
+            release_version="1.1.3+${project}"
+          fi
+          name="Held Shield DR 1.1.3+${mc_version} ${loader}"
+          jar_path="$(find "${project}/build/libs" -maxdepth 1 -type f -name 'held-shield-dr-*.jar' ! -name '*-sources.jar' ! -name '*-dev.jar' | head -n 1)"
+
+          if [ -z "$jar_path" ]; then
+            echo "No publishable jar found in ${project}/build/libs"
+            exit 1
+          fi
+
+          {
+            echo "mc_version=${mc_version}"
+            echo "loader=${loader}"
+            echo "release_version=${release_version}"
+            echo "name=${name}"
+            echo "jar_path=${jar_path}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Check publish targets
+        shell: bash
+        run: |
+          if [ -z "${{ inputs.modrinth-id }}" ] && [ -z "${{ inputs.curseforge-id }}" ]; then
+            echo "Set at least one target project id."
+            exit 1
+          fi
+
+      - name: Publish to CurseForge only
+        if: ${{ inputs.curseforge-id != '' && inputs.modrinth-id == '' }}
+        uses: Kira-NT/mc-publish@v3.3
+        with:
+          curseforge-id: ${{ inputs.curseforge-id }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          files: ${{ steps.meta.outputs.jar_path }}
+          name: ${{ steps.meta.outputs.name }}
+          version: ${{ steps.meta.outputs.release_version }}
+          version-type: ${{ inputs.version-type }}
+          loaders: ${{ steps.meta.outputs.loader }}
+          game-versions: ${{ steps.meta.outputs.mc_version }}
+          changelog-file: ${{ inputs.changelog-file }}
+
+      - name: Publish to Modrinth only
+        if: ${{ inputs.modrinth-id != '' && inputs.curseforge-id == '' }}
+        uses: Kira-NT/mc-publish@v3.3
+        with:
+          modrinth-id: ${{ inputs.modrinth-id }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          files: ${{ steps.meta.outputs.jar_path }}
+          name: ${{ steps.meta.outputs.name }}
+          version: ${{ steps.meta.outputs.release_version }}
+          version-type: ${{ inputs.version-type }}
+          loaders: ${{ steps.meta.outputs.loader }}
+          game-versions: ${{ steps.meta.outputs.mc_version }}
+          changelog-file: ${{ inputs.changelog-file }}
+
+      - name: Publish to Modrinth and CurseForge
+        if: ${{ inputs.modrinth-id != '' && inputs.curseforge-id != '' }}
+        uses: Kira-NT/mc-publish@v3.3
+        with:
+          modrinth-id: ${{ inputs.modrinth-id }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          curseforge-id: ${{ inputs.curseforge-id }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          files: ${{ steps.meta.outputs.jar_path }}
+          name: ${{ steps.meta.outputs.name }}
+          version: ${{ steps.meta.outputs.release_version }}
+          version-type: ${{ inputs.version-type }}
+          loaders: ${{ steps.meta.outputs.loader }}
+          game-versions: ${{ steps.meta.outputs.mc_version }}
+          changelog-file: ${{ inputs.changelog-file }}
