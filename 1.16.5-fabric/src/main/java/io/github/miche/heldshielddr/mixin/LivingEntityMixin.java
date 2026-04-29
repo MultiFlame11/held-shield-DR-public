@@ -5,10 +5,13 @@ import io.github.miche.heldshielddr.ShieldDrConfig;
 import io.github.miche.heldshielddr.ShieldItemHelper;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -18,6 +21,8 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
+    private static final Map<UUID, Long> heldShieldDr$lastProcSoundTicks = new ConcurrentHashMap<>();
+
     @ModifyArg(
         method = "hurt",
         at = @At(
@@ -68,15 +73,64 @@ public abstract class LivingEntityMixin {
             return amount;
         }
 
-        if (heldShieldReductionPercent == null) return amount;
+        if (heldShieldReductionPercent == null || !heldShieldDr$rollPassiveBlock(self, config)) return amount;
 
-        float reducedAmount = amount * config.getDamageMultiplier(heldShieldReductionPercent);
+        double finalReductionPercent = heldShieldDr$resolveDamageReductionPercent(self, heldShieldReductionPercent, config);
+        float reducedAmount = amount * config.getDamageMultiplier(finalReductionPercent);
 
         if (config.shieldDurabilityDrainEnabled) {
             heldShieldDr$applyDurabilityDrain(self, amount - reducedAmount, config);
         }
 
+        if (reducedAmount < amount) {
+            heldShieldDr$playProcSound(self, config);
+        }
+
         return reducedAmount;
+    }
+
+    private static boolean heldShieldDr$rollPassiveBlock(LivingEntity living, ShieldDrConfig config) {
+        double chance = Math.max(0.0D, Math.min(1.0D, config.passiveBlockChance));
+        return chance >= 1.0D || (chance > 0.0D && living.getRandom().nextDouble() < chance);
+    }
+
+    private static double heldShieldDr$resolveDamageReductionPercent(LivingEntity living, double basePercent, ShieldDrConfig config) {
+        String mode = config.damageReductionMode;
+        if (mode == null || !mode.trim().equalsIgnoreCase("random_range")) {
+            return basePercent;
+        }
+
+        double min = Math.max(0.0D, Math.min(100.0D, config.damageReductionMinPercent));
+        double max = Math.max(0.0D, Math.min(100.0D, config.damageReductionMaxPercent));
+        if (max < min) {
+            double swap = min;
+            min = max;
+            max = swap;
+        }
+        return min + living.getRandom().nextDouble() * (max - min);
+    }
+
+    private static void heldShieldDr$playProcSound(LivingEntity living, ShieldDrConfig config) {
+        String rawId = config.procSoundId;
+        if (rawId == null || rawId.trim().isEmpty()) {
+            return;
+        }
+
+        long now = living.level.getGameTime();
+        int cooldown = Math.max(0, config.procSoundCooldownTicks);
+        UUID id = living.getUUID();
+        Long last = heldShieldDr$lastProcSoundTicks.get(id);
+        if (last != null && now - last < cooldown) {
+            return;
+        }
+
+        SoundEvent sound = Registry.SOUND_EVENT.get(new ResourceLocation(rawId.trim()));
+        if (sound == null) {
+            return;
+        }
+
+        heldShieldDr$lastProcSoundTicks.put(id, now);
+        living.level.playSound(null, living.getX(), living.getY(), living.getZ(), sound, SoundSource.PLAYERS, (float) config.procSoundVolume, (float) config.procSoundPitch);
     }
 
     private static void heldShieldDr$applyDurabilityDrain(LivingEntity living, float damagePrevented, ShieldDrConfig config) {

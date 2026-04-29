@@ -15,6 +15,14 @@ public class ShieldDrConfig {
 
     public static final ModConfigSpec.BooleanValue ENABLED;
     public static final ModConfigSpec.DoubleValue DAMAGE_REDUCTION_PERCENT;
+    public static final ModConfigSpec.DoubleValue PASSIVE_BLOCK_CHANCE;
+    public static final ModConfigSpec.ConfigValue<String> DAMAGE_REDUCTION_MODE;
+    public static final ModConfigSpec.DoubleValue DAMAGE_REDUCTION_MIN_PERCENT;
+    public static final ModConfigSpec.DoubleValue DAMAGE_REDUCTION_MAX_PERCENT;
+    public static final ModConfigSpec.ConfigValue<String> PROC_SOUND_ID;
+    public static final ModConfigSpec.DoubleValue PROC_SOUND_VOLUME;
+    public static final ModConfigSpec.DoubleValue PROC_SOUND_PITCH;
+    public static final ModConfigSpec.IntValue PROC_SOUND_COOLDOWN_TICKS;
     public static final ModConfigSpec.BooleanValue APPLY_TO_PLAYERS;
     public static final ModConfigSpec.BooleanValue PLAYERS_USE_ITEM_OVERRIDES;
     public static final ModConfigSpec.BooleanValue SHOW_SHIELD_TOOLTIPS;
@@ -45,6 +53,37 @@ public class ShieldDrConfig {
                 "Per-entity overrides only affect non-player entities and take priority over this value for those entities."
             )
             .defineInRange("damageReductionPercent", 33.0, 0.0, 100.0);
+        PASSIVE_BLOCK_CHANCE = builder
+            .comment("Chance that passive held shield DR triggers on a valid hit. 1.0 = always, 0.25 = 25 percent.")
+            .defineInRange("passiveBlockChance", 1.0, 0.0, 1.0);
+
+        DAMAGE_REDUCTION_MODE = builder
+            .comment("How passive shield DR is picked. fixed uses the normal DR value. random_range rolls between damageReductionMinPercent and damageReductionMaxPercent.")
+            .define("damageReductionMode", "fixed");
+
+        DAMAGE_REDUCTION_MIN_PERCENT = builder
+            .comment("Minimum DR percent used when damageReductionMode is random_range.")
+            .defineInRange("damageReductionMinPercent", 20.0, 0.0, 100.0);
+
+        DAMAGE_REDUCTION_MAX_PERCENT = builder
+            .comment("Maximum DR percent used when damageReductionMode is random_range.")
+            .defineInRange("damageReductionMaxPercent", 33.0, 0.0, 100.0);
+
+        PROC_SOUND_ID = builder
+            .comment("Optional sound id played when passive shield DR triggers. Blank disables it. Example: minecraft:item.shield.block")
+            .define("procSoundId", "");
+
+        PROC_SOUND_VOLUME = builder
+            .comment("Volume for procSoundId.")
+            .defineInRange("procSoundVolume", 0.7, 0.0, 4.0);
+
+        PROC_SOUND_PITCH = builder
+            .comment("Pitch for procSoundId.")
+            .defineInRange("procSoundPitch", 1.0, 0.1, 4.0);
+
+        PROC_SOUND_COOLDOWN_TICKS = builder
+            .comment("Minimum ticks between proc sounds for the same entity.")
+            .defineInRange("procSoundCooldownTicks", 10, 0, 1200);
 
         APPLY_TO_PLAYERS = builder
             .comment(

@@ -12,6 +12,8 @@ Normally if you're just carrying a shield without raising it you take full damag
 - No active blocking needed, purely passive
 - Players only by default, but can be extended to mobs
 - Per-entity and per-item DR overrides if you want finer control
+- Optional proc chance and random DR range for map or pack tuning
+- Optional sound when passive shield DR triggers
 - Optional durability drain so the shield pays a cost for what it absorbs
 - Shield items show their DR value in the tooltip
 
@@ -28,10 +30,25 @@ Fabric: `heldshielddr.json` in your config folder
 |---|---|---|
 | `enabled` | `true` | Turns the whole mod off if false. |
 | `damageReductionPercent` | `33.0` | How much damage is reduced for players and whitelisted entities. 33 = one third less. |
+| `passiveBlockChance` | `1.0` | Chance that passive shield DR triggers on a valid hit. 1.0 = always, 0.25 = 25 percent. |
+| `damageReductionMode` | `fixed` | `fixed` uses the normal DR value. `random_range` rolls between `damageReductionMinPercent` and `damageReductionMaxPercent`. |
+| `damageReductionMinPercent` | `20.0` | Minimum DR percent used by `random_range`. |
+| `damageReductionMaxPercent` | `33.0` | Maximum DR percent used by `random_range`. |
 | `applyToPlayers` | `true` | Whether players get the DR at all. |
 | `playersUseItemOverrides` | `true` | If the held shield has a per-item override, players use it instead of the normal percent. |
 | `showShieldTooltips` | `true` | Adds a line to shield tooltips showing the DR value. Requires client install to show. |
 | `showItemOverrideText` | `false` | Adds "(Item Override)" to the tooltip when a per-item value is being used. |
+
+### Proc sound
+
+Blank sound ID means no sound plays.
+
+| Option | Default | Description |
+|---|---|---|
+| `procSoundId` | *(blank)* | Sound played when passive shield DR actually reduces damage. Example: `minecraft:item.shield.block` |
+| `procSoundVolume` | `0.7` | Sound volume. |
+| `procSoundPitch` | `1.0` | Sound pitch. |
+| `procSoundCooldownTicks` | `10` | Minimum ticks between proc sounds for the same entity. |
 
 ### Entities
 
@@ -85,18 +102,18 @@ Per-item overrides layer on top: if an entity is covered by whitelist or all-ent
 
 | Version | Loader | Jar |
 |---|---|---|
-| 1.12.2 | Forge | `held-shield-dr-1.1.2+1.12.2-forge.jar` |
-| 1.16.5 | Forge | `held-shield-dr-1.1.2+1.16.5-forge.jar` |
-| 1.16.5 | Fabric | `held-shield-dr-1.1.2+1.16.5-fabric.jar` |
-| 1.18.2 | Forge | `held-shield-dr-1.1.2+1.18.2-forge.jar` |
-| 1.18.2 | Fabric | `held-shield-dr-1.1.2+1.18.2-fabric.jar` |
-| 1.20.1 | Forge | `held-shield-dr-1.1.2+1.20.1-forge.jar` |
-| 1.20.1 | Fabric | `held-shield-dr-1.1.2+1.20.1-fabric.jar` |
-| 1.20.4 | NeoForge | `held-shield-dr-1.1.2+1.20.4-neoforge.jar` |
-| 1.20.4 | Fabric | `held-shield-dr-1.1.2+1.20.4-fabric.jar` |
-| 1.21.1 | Forge | `held-shield-dr-1.1.2+1.21.1-forge.jar` |
-| 1.21.1 | NeoForge | `held-shield-dr-1.1.2+1.21.1-neoforge.jar` |
-| 1.21.1 | Fabric | `held-shield-dr-1.1.2+1.21.1-fabric.jar` |
+| 1.12.2 | Forge | `held-shield-dr-1.1.3+1.12.2-forge.jar` |
+| 1.16.5 | Forge | `held-shield-dr-1.1.3+1.16.5-forge.jar` |
+| 1.16.5 | Fabric | `held-shield-dr-1.1.3+1.16.5-fabric.jar` |
+| 1.18.2 | Forge | `held-shield-dr-1.1.3+1.18.2-forge.jar` |
+| 1.18.2 | Fabric | `held-shield-dr-1.1.3+1.18.2-fabric.jar` |
+| 1.20.1 | Forge | `held-shield-dr-1.1.3+1.20.1-forge.jar` |
+| 1.20.1 | Fabric | `held-shield-dr-1.1.3+1.20.1-fabric.jar` |
+| 1.20.4 | NeoForge | `held-shield-dr-1.1.3+1.20.4-neoforge.jar` |
+| 1.20.4 | Fabric | `held-shield-dr-1.1.3+1.20.4-fabric.jar` |
+| 1.21.1 | Forge | `held-shield-dr-1.1.3+1.21.1-forge.jar` |
+| 1.21.1 | NeoForge | `held-shield-dr-1.1.3+1.21.1-neoforge.jar` |
+| 1.21.1 | Fabric | `held-shield-dr-1.1.3+1.21.1-fabric.jar` |
 
 ---
 

@@ -22,6 +22,14 @@ public final class ShieldDrConfig {
 
     public boolean enabled = true;
     public double damageReductionPercent = 33.0;
+    public double passiveBlockChance = 1.0;
+    public String damageReductionMode = "fixed";
+    public double damageReductionMinPercent = 20.0;
+    public double damageReductionMaxPercent = 33.0;
+    public String procSoundId = "";
+    public double procSoundVolume = 0.7;
+    public double procSoundPitch = 1.0;
+    public int procSoundCooldownTicks = 10;
     public boolean applyToPlayers = true;
     public boolean playersUseItemOverrides = true;
     public boolean showShieldTooltips = true;

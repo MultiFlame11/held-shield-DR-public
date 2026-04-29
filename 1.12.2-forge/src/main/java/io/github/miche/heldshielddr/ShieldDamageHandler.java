@@ -2,16 +2,22 @@ package io.github.miche.heldshielddr;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class ShieldDamageHandler {
+    private static final Map<UUID, Long> LAST_PROC_SOUND_TICKS = new ConcurrentHashMap<UUID, Long>();
     @SubscribeEvent
     public void onLivingDamage(LivingDamageEvent event) {
         EntityLivingBase living = event.getEntityLiving();
@@ -45,19 +51,65 @@ public class ShieldDamageHandler {
             return;
         }
 
-        if (heldShieldReductionPercent == null) {
+        if (heldShieldReductionPercent == null || !rollPassiveBlock(living)) {
             return;
         }
 
+        double finalReductionPercent = resolveDamageReductionPercent(living, heldShieldReductionPercent);
         float originalAmount = event.getAmount();
-        float reducedAmount = originalAmount * ShieldDrConfig.getDamageMultiplier(heldShieldReductionPercent);
+        float reducedAmount = originalAmount * ShieldDrConfig.getDamageMultiplier(finalReductionPercent);
         event.setAmount(reducedAmount);
+        if (reducedAmount < originalAmount) {
+            playProcSound(living);
+        }
 
         if (ShieldDrConfig.shieldDurabilityDrainEnabled) {
             applyDurabilityDrain(living, originalAmount - reducedAmount);
         }
     }
+    private static boolean rollPassiveBlock(EntityLivingBase living) {
+        double chance = Math.max(0.0D, Math.min(1.0D, ShieldDrConfig.passiveBlockChance));
+        return chance >= 1.0D || (chance > 0.0D && living.getRNG().nextDouble() < chance);
+    }
 
+    private static double resolveDamageReductionPercent(EntityLivingBase living, double basePercent) {
+        String mode = ShieldDrConfig.damageReductionMode;
+        if (mode == null || !mode.trim().equalsIgnoreCase("random_range")) {
+            return basePercent;
+        }
+
+        double min = Math.max(0.0D, Math.min(100.0D, ShieldDrConfig.damageReductionMinPercent));
+        double max = Math.max(0.0D, Math.min(100.0D, ShieldDrConfig.damageReductionMaxPercent));
+        if (max < min) {
+            double swap = min;
+            min = max;
+            max = swap;
+        }
+        return min + living.getRNG().nextDouble() * (max - min);
+    }
+
+    private static void playProcSound(EntityLivingBase living) {
+        String rawId = ShieldDrConfig.procSoundId;
+        if (rawId == null || rawId.trim().isEmpty()) {
+            return;
+        }
+
+        long now = living.world.getTotalWorldTime();
+        int cooldown = Math.max(0, ShieldDrConfig.procSoundCooldownTicks);
+        UUID id = living.getUniqueID();
+        Long last = LAST_PROC_SOUND_TICKS.get(id);
+        if (last != null && now - last < cooldown) {
+            return;
+        }
+
+        SoundEvent sound = ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(rawId.trim()));
+        if (sound == null) {
+            return;
+        }
+
+        LAST_PROC_SOUND_TICKS.put(id, now);
+        living.world.playSound(null, living.posX, living.posY, living.posZ, sound, SoundCategory.PLAYERS, (float) ShieldDrConfig.procSoundVolume, (float) ShieldDrConfig.procSoundPitch);
+    }
     private static void applyDurabilityDrain(EntityLivingBase living, float damagePrevented) {
         if (damagePrevented <= 0.0F) return;
 

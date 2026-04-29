@@ -27,6 +27,45 @@ public class ShieldDrConfig {
     })
     @Config.RangeDouble(min = 0.0D, max = 100.0D)
     public static double damageReductionPercent = 33.0D;
+    @Config.Comment({
+        "Chance that passive held shield DR triggers on a valid hit.",
+        "1.0 = always, 0.25 = 25 percent."
+    })
+    @Config.RangeDouble(min = 0.0D, max = 1.0D)
+    public static double passiveBlockChance = 1.0D;
+
+    @Config.Comment({
+        "How passive shield DR is picked.",
+        "fixed uses the normal DR value.",
+        "random_range rolls between damageReductionMinPercent and damageReductionMaxPercent."
+    })
+    public static String damageReductionMode = "fixed";
+
+    @Config.Comment("Minimum DR percent used when damageReductionMode is random_range.")
+    @Config.RangeDouble(min = 0.0D, max = 100.0D)
+    public static double damageReductionMinPercent = 20.0D;
+
+    @Config.Comment("Maximum DR percent used when damageReductionMode is random_range.")
+    @Config.RangeDouble(min = 0.0D, max = 100.0D)
+    public static double damageReductionMaxPercent = 33.0D;
+
+    @Config.Comment({
+        "Optional sound id played when passive shield DR triggers.",
+        "Blank disables it. Example: minecraft:item.shield.block"
+    })
+    public static String procSoundId = "";
+
+    @Config.Comment("Volume for procSoundId.")
+    @Config.RangeDouble(min = 0.0D, max = 4.0D)
+    public static double procSoundVolume = 0.7D;
+
+    @Config.Comment("Pitch for procSoundId.")
+    @Config.RangeDouble(min = 0.1D, max = 4.0D)
+    public static double procSoundPitch = 1.0D;
+
+    @Config.Comment("Minimum ticks between proc sounds for the same entity.")
+    @Config.RangeInt(min = 0, max = 1200)
+    public static int procSoundCooldownTicks = 10;
 
     @Config.Comment({
         "If true, players can benefit from held shield damage reduction using damageReductionPercent.",
