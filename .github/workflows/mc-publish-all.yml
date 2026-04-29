@@ -68,10 +68,10 @@ jobs:
         run: |
           project="${{ matrix.project }}"
           case "$project" in
-            1.12.2-*|1.16.5-*)
+            1.12.2-*)
               echo "version=8" >> "$GITHUB_OUTPUT"
               ;;
-            1.18.2-*|1.20.1-*|1.20.4-*)
+            1.16.5-*|1.18.2-*|1.20.1-*|1.20.4-*)
               echo "version=17" >> "$GITHUB_OUTPUT"
               ;;
             *)
